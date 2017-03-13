@@ -29,7 +29,102 @@
 #include <libsign.h>
 #include <signaturelet.h>
 
+#include "SELoader.h"
+
 #define SELoader_signaturelet_id		"SELoader"
+
+static int
+construct_sel_signature(uint8_t *sig_content, unsigned sig_content_size,
+			unsigned long flags, BIO **out_signed_data)
+{
+	BIO *signed_data;
+
+	signed_data = BIO_new(BIO_s_mem());
+	if (!signed_data)
+		return EXIT_FAILURE;
+
+	BIO *tag_directory;
+
+	tag_directory = BIO_new(BIO_s_mem());
+	if (!signed_data)
+		return EXIT_FAILURE;
+
+	BIO *payload;
+
+	payload = BIO_new(BIO_s_mem());
+	if (!signed_data)
+		return EXIT_FAILURE;
+
+	SEL_SIGNATURE_HEADER header;
+
+	strncpy((char *)&header.Magic, SelSigantureMagic,
+		sizeof(header.Magic));
+	header.Revision = SelSignatureRevision;
+	header.HeaderSize = sizeof(header);
+	header.Flags = 0;
+
+	unsigned int nr_tag = 0;
+	unsigned int payload_size = 0;
+
+	if (!(flags & SIGNLET_FLAGS_ATTACHED_CONTENT)) {
+		SEL_SIGNATURE_TAG hash_alg_tag;
+
+		hash_alg_tag.Tag = SelSignatureTagHashAlgorithm;
+		hash_alg_tag.Revision = 0;
+		hash_alg_tag.Reserved = 0;
+		hash_alg_tag.Flags = 0;
+		hash_alg_tag.DataOffset = payload_size;
+		hash_alg_tag.DataSize = sizeof(SEL_SIGNATURE_TAG_HASH_ALGORITHM);
+		BIO_write(tag_directory, &hash_alg_tag, sizeof(hash_alg_tag));
+		++nr_tag;
+
+		SEL_SIGNATURE_TAG_HASH_ALGORITHM hash_alg;
+
+		hash_alg.Algorithm = SelHashAlgorithmSha256;
+		BIO_write(payload, &hash_alg, sizeof(hash_alg));
+
+		payload_size += hash_alg_tag.DataSize;
+	}
+
+	SEL_SIGNATURE_TAG content_tag;
+
+	content_tag.Tag = SelSignatureTagContent;
+	content_tag.Revision = 0;
+	content_tag.Reserved = 0;
+	content_tag.Flags = 0;
+	content_tag.DataOffset = payload_size;
+	content_tag.DataSize = sig_content_size;
+	BIO_write(tag_directory, &content_tag, sizeof(content_tag));
+	++nr_tag;
+
+	BIO_write(payload, sig_content, sig_content_size);
+	payload_size += content_tag.DataSize;
+
+	header.TagDirectorySize = nr_tag * sizeof(SEL_SIGNATURE_TAG);
+	header.NumberOfTag = nr_tag;
+	header.PayloadSize = payload_size;
+
+	BIO_write(signed_data, &header, header.HeaderSize);
+
+	char *write_data;
+	long write_len;
+
+	write_len = BIO_get_mem_data(tag_directory, &write_data);
+	BIO_write(signed_data, write_data, write_len);
+	BIO_free(tag_directory);
+
+	write_len = BIO_get_mem_data(payload, &write_data);
+	BIO_write(signed_data, write_data, write_len);
+	BIO_free(payload);
+
+	write_len = BIO_get_mem_data(signed_data, &write_data);
+	libsign_utils_hex_dump("SELoader signature", (uint8_t *)write_data,
+			       write_len);
+
+	*out_signed_data = signed_data;
+
+	return EXIT_SUCCESS;
+}
 
 static int
 SELoader_sign(libsign_signaturelet_t *siglet, uint8_t *data,
@@ -53,62 +148,62 @@ SELoader_sign(libsign_signaturelet_t *siglet, uint8_t *data,
 		if (!x509_certs[i]) {
 			err("Failed to load the X.509 certificate %s\n",
 			    cert_list[i]);
-			while (--i >= 0)
-				libsign_x509_unload(x509_certs[i]);
-			libsign_key_unload(privkey);
-			return EXIT_FAILURE;
+			goto err;
 		}
 	}
 
-#if 0
-	uint8_t *digest;
-	int rc = libsign_digest_calculate(siglet->digest_alg, data,
-					  data_size, &digest);
-	if (rc) {
-		while (--i >= 0)
-			libsign_x509_unload(x509_certs[i]);
-		libsign_key_unload(privkey);
-		return rc;
+	uint8_t *sig_content;
+	unsigned int sig_content_size;
+	uint8_t *digest = NULL;
+	int rc;
+
+flags = SIGNLET_FLAGS_DETACHED_SIGNATURE | SIGNLET_FLAGS_ATTACHED_CONTENT;
+	if (!(flags & SIGNLET_FLAGS_ATTACHED_CONTENT)) {
+		rc = libsign_digest_calculate(siglet->digest_alg, data,
+					      data_size, &digest);
+		if (rc)
+			goto err;
+
+		unsigned int digest_size;
+		libsign_digest_size(siglet->digest_alg, &digest_size);
+
+		libsign_utils_hex_dump("Signed content", digest, digest_size);
+
+		sig_content = digest;
+		sig_content_size = digest_size;
+	} else {
+		sig_content = data;
+		sig_content_size = data_size;
 	}
 
-	unsigned int digest_size;
-	libsign_digest_size(siglet->digest_alg, &digest_size);
-
-	BIO *signed_data = BIO_new_mem_buf(digest, digest_size);
-	if (!signed_data) {
-		ERR_print_errors_fp(stderr);
-		free(digest);
-		while (--i >= 0)
-			libsign_x509_unload(x509_certs[i]);
-		libsign_key_unload(privkey);
-		return EXIT_FAILURE;
-	}
-
-	libsign_utils_hex_dump("Signed content", digest, digest_size);
-#else
-	BIO *signed_data = BIO_new_mem_buf(data, data_size);
-	if (!signed_data) {
-		ERR_print_errors_fp(stderr);
-		while (--i >= 0)
-			libsign_x509_unload(x509_certs[i]);
-		libsign_key_unload(privkey);
-		return EXIT_FAILURE;
-	}
-#endif
-
-	bool detached_signature = 0;
 	int sign_flags;
+	BIO *signed_data;
 
-	if (!detached_signature)
+	if (!(flags & SIGNLET_FLAGS_DETACHED_SIGNATURE)) {
+		rc = construct_sel_signature(sig_content, sig_content_size,
+					     flags, &signed_data);
+		if (rc)
+			goto err;
+
+		sig_content_size = BIO_ctrl_pending(signed_data);
 		sign_flags = PKCS7_BINARY;
-	else
+	} else {
+		signed_data = BIO_new_mem_buf(sig_content, sig_content_size);
+		if (!signed_data)
+			goto err;
+
 		sign_flags = PKCS7_DETACHED;
+	}
+
+	if (digest) {
+		free(digest);
+		digest = NULL;
+	}
 
 	/* XXX: support to use CA list */
 	PKCS7 *pkcs7 = PKCS7_sign(x509_certs[0], privkey, NULL,
 				  signed_data, sign_flags);
 	BIO_free(signed_data);
-	//free(digest);
 	while (--i >= 0)
 		libsign_x509_unload(x509_certs[i]);
 	libsign_key_unload(privkey);
@@ -133,11 +228,21 @@ SELoader_sign(libsign_signaturelet_t *siglet, uint8_t *data,
 	*out_sig = sig;
 	*out_sig_size = sig_size;
 
-	info("SELoader PKCS#7 signature (signed content %d-byte) generated\n",
-	     data_size);
-	     //digest_size);
+	libsign_utils_hex_dump("Signature dump", sig, sig_size);
+
+	info("SELoader PKCS#7 %s signature (signed content %d-byte) "
+	     "generated\n", flags & SIGNLET_FLAGS_DETACHED_SIGNATURE ?
+			    "detached" : "attached", sig_content_size);
 
 	return EXIT_SUCCESS;
+err:
+	free(digest);
+
+	while (--i >= 0)
+		libsign_x509_unload(x509_certs[i]);
+	libsign_key_unload(privkey);
+
+	return EXIT_FAILURE;
 }
 
 static libsign_signaturelet_t SEloader_signaturelet = {

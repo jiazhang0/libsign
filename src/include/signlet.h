@@ -34,6 +34,8 @@
 #define SIGNLET_MAX_NR_REQUEST			256
 #define SIGNLET_MAX_NR_CERT			16
 
+#define SIGNLET_FLAGS_HASHED_CONTENT		(1 << 0)
+
 typedef struct {
 	const char *siglet;
 	const char **signed_file_list;
