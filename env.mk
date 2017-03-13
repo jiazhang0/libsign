@@ -1,5 +1,3 @@
-include version.mk
-
 CROSS_COMPILE ?=
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)ld
