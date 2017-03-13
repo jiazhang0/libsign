@@ -207,7 +207,7 @@ libsign_utils_hex_dump(const char *prompt, uint8_t *data,
 		       unsigned int data_size)
 {
 	if (prompt)
-		dbg("%s: ", prompt);
+		dbg("%s (%d-byte): ", prompt, data_size);
 
 	for (unsigned int i = 0; i < data_size; ++i)
 		dbg_cont("%02x", data[i]);
