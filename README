@@ -1,0 +1,25 @@
+libsign
+=======
+
+This project targets to provide a generic signing framework. This framework
+separates the signing request and signing process and correspondingly forms
+the so-called signlet and signaturelet.
+
+Each signaturelet only concerns about the details about how to construct the
+layout of a signature format, and signlet only cares how to construct the
+signing request.
+
+selsign
+-------
+
+This signlet provides the capability of signing the file with SELoader PKCS#7
+signature.
+
+Here is the signing example:
+
+$ selsign <file>
+
+By default, the generated signature file is suffixed by ".p7a".
+
+To dump the content of signature, run:
+$ openssl pkcs7 -in <file.p7a> -print -text -noout

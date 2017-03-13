@@ -1,0 +1,9 @@
+#!/bin/bash
+
+S="${BASH_SOURCE[0]}"
+D=`dirname "$S"`
+LIBSIGN_ROOT="`cd "$D"/.. && pwd`"
+
+echo "LIBSIGN_ROOT=$LIBSIGN_ROOT"
+
+LD_LIBRARY_PATH=$LIBSIGN_ROOT/src/lib $LIBSIGN_ROOT/src/selsign/selsign "$1"

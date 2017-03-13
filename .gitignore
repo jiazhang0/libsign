@@ -1,0 +1,10 @@
+src/lib/build_info.c
+src/selsign/selsign
+*.o
+*.so
+*.a
+*.siglet
+*.p7a
+*.p7s
+*.patch
+bak
