@@ -22,4 +22,4 @@ $ selsign <file>
 By default, the generated signature file is suffixed by ".p7a".
 
 To dump the content of signature, run:
-$ openssl pkcs7 -in <file.p7a> -print -text -noout
+$ openssl pkcs7 -in <file.p7a> -inform DER -print -text -noout
