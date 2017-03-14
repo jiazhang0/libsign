@@ -6,6 +6,14 @@ LIBSIGN_ROOT="`cd "$D"/.. && pwd`"
 
 echo "LIBSIGN_ROOT=$LIBSIGN_ROOT"
 
-LD_LIBRARY_PATH=$LIBSIGN_ROOT/src/lib $LIBSIGN_ROOT/src/selsign/selsign "$1"
+cmd="LD_LIBRARY_PATH=$LIBSIGN_ROOT/src/lib $LIBSIGN_ROOT/src/selsign/selsign"
 
-openssl pkcs7 -in "$1.p7a" -inform DER -print -text -noout
+[ -z "$1" ] && {
+    eval "$cmd"
+    exit 1
+}
+
+eval "$cmd $1"
+
+[ $? -eq 0 -a -s "$1.p7a" ] &&
+    openssl pkcs7 -in "$1.p7a" -inform DER -print -text -noout
