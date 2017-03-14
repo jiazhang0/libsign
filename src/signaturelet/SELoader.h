@@ -36,11 +36,8 @@
 #define SelSignatureRevision			1
 #define SelSigantureMagic			"SELS"
 
-#define SIGNLET_FLAGS_ATTACHED_CONTENT		(1 << 0)
-#define SIGNLET_FLAGS_DETACHED_SIGNATURE	(1 << 1)
-
 typedef struct {
-	uint32_t Magic;				/* 'SELS' */
+	uint32_t Magic;
 	uint8_t Revision;			/* Signature format version */
 	uint32_t HeaderSize;
 	uint32_t TagDirectorySize;

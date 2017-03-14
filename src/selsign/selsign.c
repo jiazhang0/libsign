@@ -222,6 +222,7 @@ main(int argc, char **argv)
 		.cert_list = cert_list,
 		.digest_alg = LIBSIGN_DIGEST_ALG_SHA256,
 		.cipher_alg = LIBSIGN_CIPHER_ALG_RSA,
+		.flags = SIGNLET_FLAGS_CONTENT_ATTACHED,
 	};
 
 	rc = signlet_request(&request);

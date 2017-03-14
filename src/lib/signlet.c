@@ -53,6 +53,12 @@ parse_request(signlet_request_t *request, signlet_context *context)
 		return EXIT_FAILURE;
 	}
 
+	if ((request->flags & SIGNLET_FLAGS_CONTENT_ATTACHED) &&
+	    (request->flags & SIGNLET_FLAGS_DETACHED_SIGNATURE)) {
+		err("Invalid flags (0x%lx)\n", request->flags);
+		return EXIT_FAILURE;
+	}
+
 	if (!request->signed_file_list) {
 		err("The signed file list is not specified\n");
 		return EXIT_FAILURE;

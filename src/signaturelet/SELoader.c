@@ -28,6 +28,7 @@
 
 #include <libsign.h>
 #include <signaturelet.h>
+#include <signlet.h>
 
 #include "SELoader.h"
 
@@ -66,7 +67,7 @@ construct_sel_signature(uint8_t *sig_content, unsigned sig_content_size,
 	unsigned int nr_tag = 0;
 	unsigned int payload_size = 0;
 
-	if (!(flags & SIGNLET_FLAGS_ATTACHED_CONTENT)) {
+	if (!(flags & SIGNLET_FLAGS_CONTENT_ATTACHED)) {
 		SEL_SIGNATURE_TAG hash_alg_tag;
 
 		hash_alg_tag.Tag = SelSignatureTagHashAlgorithm;
@@ -152,52 +153,49 @@ SELoader_sign(libsign_signaturelet_t *siglet, uint8_t *data,
 		}
 	}
 
-	uint8_t *sig_content;
-	unsigned int sig_content_size;
-	uint8_t *digest = NULL;
-	int rc;
-
-flags = SIGNLET_FLAGS_DETACHED_SIGNATURE | SIGNLET_FLAGS_ATTACHED_CONTENT;
-	if (!(flags & SIGNLET_FLAGS_ATTACHED_CONTENT)) {
-		rc = libsign_digest_calculate(siglet->digest_alg, data,
-					      data_size, &digest);
-		if (rc)
-			goto err;
-
-		unsigned int digest_size;
-		libsign_digest_size(siglet->digest_alg, &digest_size);
-
-		libsign_utils_hex_dump("Signed content", digest, digest_size);
-
-		sig_content = digest;
-		sig_content_size = digest_size;
-	} else {
-		sig_content = data;
-		sig_content_size = data_size;
-	}
-
 	int sign_flags;
 	BIO *signed_data;
+	unsigned int sig_content_size;
 
 	if (!(flags & SIGNLET_FLAGS_DETACHED_SIGNATURE)) {
+		uint8_t *sig_content;
+		uint8_t *digest = NULL;
+		int rc;
+
+		if (!(flags & SIGNLET_FLAGS_CONTENT_ATTACHED)) {
+			rc = libsign_digest_calculate(siglet->digest_alg, data,
+						      data_size, &digest);
+			if (rc)
+				goto err;
+
+			unsigned int digest_size;
+			libsign_digest_size(siglet->digest_alg, &digest_size);
+
+			libsign_utils_hex_dump("Signed content", digest,
+					       digest_size);
+
+			sig_content = digest;
+			sig_content_size = digest_size;
+		} else {
+			sig_content = data;
+			sig_content_size = data_size;
+		}
+
 		rc = construct_sel_signature(sig_content, sig_content_size,
 					     flags, &signed_data);
+		free(digest);
 		if (rc)
 			goto err;
 
 		sig_content_size = BIO_ctrl_pending(signed_data);
 		sign_flags = PKCS7_BINARY;
 	} else {
-		signed_data = BIO_new_mem_buf(sig_content, sig_content_size);
+		signed_data = BIO_new_mem_buf(data, data_size);
 		if (!signed_data)
 			goto err;
 
 		sign_flags = PKCS7_DETACHED;
-	}
-
-	if (digest) {
-		free(digest);
-		digest = NULL;
+		sig_content_size = 0;
 	}
 
 	/* XXX: support to use CA list */
@@ -236,8 +234,6 @@ flags = SIGNLET_FLAGS_DETACHED_SIGNATURE | SIGNLET_FLAGS_ATTACHED_CONTENT;
 
 	return EXIT_SUCCESS;
 err:
-	free(digest);
-
 	while (--i >= 0)
 		libsign_x509_unload(x509_certs[i]);
 	libsign_key_unload(privkey);
