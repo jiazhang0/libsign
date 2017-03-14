@@ -44,7 +44,7 @@
 static void
 show_banner(void)
 {
-	info_cont("\nEssential signing tool\n");
+	info_cont("\nSELoader signing tool\n");
 	info_cont("Copyright (c) 2017, Lans Zhang "
 		  "<jia.zhang@windriver.com>");
 	info_cont("Version: %s+git%s\n", LIBSIGN_VERSION, libsign_git_commit);
@@ -59,21 +59,25 @@ show_usage(const char *prog)
 		  "<signed_file>\n"
 		  "Sign a file for use with SELoader.\n\n"
 		  "Required arguments:\n"
-		  "    --key <key_file>     Signing key (PEM-encoded RSA "
-					   "private key)\n"
-		  "    --cert <cert_file>   Certificate corresponding to the "
-					   "signing key (PEM-encoded X.509 "
-					   "certificate)\n"
-		  "    <signed_file>        The file to be signed\n"
+		  "    --key <key_file>      Signing key (PEM-encoded RSA "
+					    "private key)\n"
+		  "    --cert <cert_file>    Certificate corresponding to the "
+					    "signing key (PEM-encoded X.509 "
+					    "certificate)\n"
+		  "    <signed_file>         The file to be signed\n"
 		  "Options:\n"
-		  "    --ca <cert_file>     CA certificate in certificate "
-					   "chain (PEM-encoded X.509 "
-					   "certificate)\n"
-		  "                         This option may be specified "
-					   "multiple times\n"
-		  "    --output <sig_file>  Write the signature to <sig_file> "
-					   "(DER-encoded PKCS#7 signature)\n"
-		  "                         Default <signed_file>.p7\n",
+		  "    --ca <cert_file>      CA certificate in certificate "
+					    "chain (PEM-encoded X.509 "
+					    "certificate)\n"
+		  "                          This option may be specified "
+					    "multiple times\n"
+		  "    --detached-signature  Generate the detached signature "
+					    "(.p7s)\n"
+		  "    --attached-content    Content the signed content in "
+					    "the signature\n"
+		  "    --output <sig_file>   Write the signature to <sig_file> "
+					    "(DER-encoded PKCS#7 signature)\n"
+		  "                          Default <signed_file>.p7a\n",
 		  prog);
 }
 
@@ -91,11 +95,13 @@ static char *opt_digest_alg = "sha256";
 static char *opt_cipher_alg = "rsa";
 static char *opt_output;
 static char *opt_signed_file;
+static bool opt_detached_signature = 0;
+static bool opt_attached_content = 1;
 
 static int
 parse_options(int argc, char *argv[])
 {
-	char opts[] = "hVvqk:c:C:S:S:o:";
+	char opts[] = "hVvqk:c:C:S:S:o:da";
 	struct option long_opts[] = {
 		{ "help", no_argument, NULL, 'h' },
 		{ "version", no_argument, NULL, 'V' },
@@ -106,6 +112,8 @@ parse_options(int argc, char *argv[])
 		{ "ca", required_argument, NULL, 'C' },
 		{ "digest-alg", required_argument, NULL, 'D' },
 		{ "cipher-alg", required_argument, NULL, 'S' },
+		{ "detached-signature", no_argument, NULL, 'd' },
+		{ "attached-content", no_argument, NULL, 'a' },
 		{ "output", required_argument, NULL, 'o' },
 		{ NULL },	/* NULL terminated */
 	};
@@ -145,6 +153,14 @@ parse_options(int argc, char *argv[])
 		case 'S':
 			opt_cipher_alg = optarg;
 			break;
+		case 'd':
+			opt_detached_signature = 1;
+			warn("The detached signature is still not "
+			     "supported\n");
+			break;
+		case 'a':
+			opt_attached_content = 1;
+			break;
 		case 'o':
 			opt_output = optarg;
 			break;
@@ -168,9 +184,8 @@ parse_options(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-
+	/* <signed_file> is not specified */
 	if (argc != optind + 1) {
-		err("No signed file specified\n");
 		show_usage(argv[0]);
 		return EXIT_FAILURE;
 	}
@@ -205,6 +220,14 @@ main(int argc, char **argv)
 	if (!opt_quite)
 		show_banner();
 
+	unsigned long flags = 0;
+
+	if (!opt_detached_signature) {
+		if (opt_attached_content)
+			flags |= SIGNLET_FLAGS_CONTENT_ATTACHED;
+	} else
+		flags |= SIGNLET_FLAGS_DETACHED_SIGNATURE;
+
 	const char *signed_file_list[] = {
 		opt_signed_file,
 		NULL
@@ -222,7 +245,7 @@ main(int argc, char **argv)
 		.cert_list = cert_list,
 		.digest_alg = LIBSIGN_DIGEST_ALG_SHA256,
 		.cipher_alg = LIBSIGN_CIPHER_ALG_RSA,
-		.flags = SIGNLET_FLAGS_CONTENT_ATTACHED,
+		.flags = flags,
 	};
 
 	rc = signlet_request(&request);
