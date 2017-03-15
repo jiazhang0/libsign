@@ -241,24 +241,33 @@ err:
 	return EXIT_FAILURE;
 }
 
+static const signaturelet_suffix_pattern_t SELoader_suffix_pattern = {
+	SIGNLET_FLAGS_DETACHED_SIGNATURE, "+.p7s", "+.p7a",
+};
+
+static const signaturelet_suffix_pattern_t *suffix_patterns[] = {
+	&SELoader_suffix_pattern,
+	NULL
+};
+
 static libsign_signaturelet_t SEloader_signaturelet = {
 	.id = SELoader_signaturelet_id,
 	.description = "SELoader PKCS#7 signature",
-	.naming_pattern = "+.p7a",
 	.digest_alg = LIBSIGN_DIGEST_ALG_SHA256,
 	.cipher_alg = LIBSIGN_CIPHER_ALG_RSA,
 	.detached = 1,
 	.sign = SELoader_sign,
+	.suffix_pattern = suffix_patterns,
 };
 
 void __attribute__ ((constructor))
-SEloader_signaturelet_init(void)
+SELoader_signaturelet_init(void)
 {
 	signaturelet_register(&SEloader_signaturelet);
 }
 
 void __attribute__((destructor))
-SEloader_signaturelet_fini(void)
+SELoader_signaturelet_fini(void)
 {
 	signaturelet_unregister(SELoader_signaturelet_id);
 }

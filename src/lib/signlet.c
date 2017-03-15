@@ -181,7 +181,8 @@ build_output_file_list(signlet_context *context)
 	const char *pattern;
 	int rc;
 
-	rc = signaturelet_naming_pattern(context->siglet, &pattern);
+	rc = signaturelet_suffix_pattern(context->siglet, context->flags,
+					 &pattern);
 	if (rc)
 		return NULL;
 
@@ -191,7 +192,8 @@ build_output_file_list(signlet_context *context)
 		return NULL;
 
 	char op = *pattern++;
-	int suffix_size = strlen(pattern);
+	const char *suffix = pattern;
+	int suffix_size = strlen(suffix);
 	unsigned int i;
 
 	for (i = 0; i < context->nr_signed_file; ++i) {

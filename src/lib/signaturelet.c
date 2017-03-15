@@ -96,37 +96,92 @@ signaturelet_load(const char *id)
 }
 
 int
-signaturelet_naming_pattern(const char *id, const char **naming_pattern)
+signaturelet_suffix_pattern(const char *id, unsigned long flags,
+			    const char **suffix_pattern)
 {
-	signaturelet_t *siglet = find_signaturelet(id);
+	signaturelet_t *siglet;
+
+	siglet = find_signaturelet(id);
 	if (!siglet)
 		return EXIT_FAILURE;
 
-	*naming_pattern = siglet->sig->naming_pattern;
+	const signaturelet_suffix_pattern_t **pattern;
+
+	pattern = siglet->sig->suffix_pattern;
+	do {
+		if ((*pattern)->flag & flags) {
+			*suffix_pattern = (*pattern)->suffix_if_flag_set;
+			return EXIT_SUCCESS;
+		} else {
+			*suffix_pattern = (*pattern)->suffix_if_flag_unset;
+			return EXIT_SUCCESS;
+		}
+	} while (*++pattern);
 
 	return EXIT_SUCCESS;
 }
 
 static int
-sanity_check_naming_pattern(const char *pattern)
+sanity_check_suffix_pattern(const signaturelet_suffix_pattern_t **pattern)
 {
-	char op = *pattern++;
-	int rc = EXIT_FAILURE;
+	int check_suffix(const char *suffix)
+	{
+		char op = *suffix++;
+		int rc = EXIT_FAILURE;
 
-	switch (op) {
-	case '+':
-		if (strlen(pattern))
-			rc = EXIT_SUCCESS;
-		else
-			err("Suffix character too short in pattern %s\n",
-		    	    pattern);
-		break;
-	default:
-		err("Unsupported operator character in pattern %s\n",
-		    pattern);
+		switch (op) {
+		case '+':
+			if (strlen(suffix))
+				rc = EXIT_SUCCESS;
+			else
+				err("Suffix character too short in pattern "
+				    "%s\n", suffix);
+			break;
+		default:
+			err("Unsupported operator character in pattern %s\n",
+			    suffix);
+		}
+
+		return rc;
 	}
 
-	return rc;
+	do {
+		int rc;
+
+		if (!(*pattern)->flag) {
+			if (!(*pattern)->suffix_if_flag_unset) {
+				err("The suffix pattern for unset case must "
+				    "be specified if flag is unset\n");
+				return EXIT_FAILURE;
+			}
+
+			rc = check_suffix((*pattern)->suffix_if_flag_unset);
+			if (rc)
+				return EXIT_FAILURE;
+		} else {
+			if (!(*pattern)->suffix_if_flag_set) {
+				err("The suffix pattern for set case must "
+				    "be specified if flag is set\n");
+				return EXIT_FAILURE;
+			}
+			
+			rc = check_suffix((*pattern)->suffix_if_flag_set);
+			if (rc)
+				return EXIT_FAILURE;
+			
+			if (!(*pattern)->suffix_if_flag_unset) {
+				err("The suffix pattern for unset case must "
+				    "be specified if flag is set\n");
+				return EXIT_FAILURE;
+			}
+			
+			rc = check_suffix((*pattern)->suffix_if_flag_unset);
+			if (rc)
+				return EXIT_FAILURE;
+		}
+	} while (*++pattern);
+	
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -155,13 +210,13 @@ sanity_check(libsign_signaturelet_t *sig)
 		return EXIT_FAILURE;
 	}
 
-	if (!sig->naming_pattern) {
-		err("naming pattern is not specified by signaturelet %s\n",
+	if (!sig->suffix_pattern || !sig->suffix_pattern[0]) {
+		err("Suffix pattern is not specified by signaturelet %s\n",
 		    sig->id);
 		return EXIT_FAILURE;
 	}
 
-	if (sanity_check_naming_pattern(sig->naming_pattern))
+	if (sanity_check_suffix_pattern(sig->suffix_pattern))
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;

@@ -31,6 +31,12 @@
 
 #include <libsign.h>
 
+typedef struct {
+	unsigned long flag;
+	const char *suffix_if_flag_set;
+	const char *suffix_if_flag_unset;
+} signaturelet_suffix_pattern_t;
+
 typedef struct __libsign_signaturelet	libsign_signaturelet_t;
 
 typedef struct __libsign_signaturelet {
@@ -44,7 +50,7 @@ typedef struct __libsign_signaturelet {
 		    const char **cert_list, unsigned int nr_cert,
 		    uint8_t **out_sig, unsigned int *out_sig_size,
 		    unsigned long flags);
-	const char *naming_pattern;
+	const signaturelet_suffix_pattern_t **suffix_pattern;
 } libsign_signaturelet_t;
 
 int
@@ -57,7 +63,8 @@ int
 signaturelet_load(const char *id);
 
 int
-signaturelet_naming_pattern(const char *id, const char **naming_pattern);
+signaturelet_suffix_pattern(const char *id, unsigned long flags,
+			    const char **suffix_pattern);
 
 int
 signaturelet_sign(const char *id, uint8_t *data, unsigned int data_size,
