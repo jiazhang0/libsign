@@ -155,8 +155,6 @@ parse_options(int argc, char *argv[])
 			break;
 		case 'd':
 			opt_detached_signature = 1;
-			warn("The detached signature is still not "
-			     "supported\n");
 			break;
 		case 'a':
 			opt_attached_content = 1;
@@ -194,6 +192,12 @@ parse_options(int argc, char *argv[])
 	if (!opt_signed_file || !opt_signed_file[0]) {
 		err("Invalid path of signed file specified\n");
 		show_usage(argv[0]);
+		return EXIT_FAILURE;
+	}
+
+	if (opt_detached_signature) {
+		err("The detached signature is still not "
+		    "supported\n");
 		return EXIT_FAILURE;
 	}
 
