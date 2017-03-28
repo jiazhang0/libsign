@@ -73,11 +73,11 @@ show_usage(const char *prog)
 					    "multiple times\n"
 		  "    --detached-signature  Generate the detached signature "
 					    "(.p7s)\n"
-		  "    --attached-content    Content the signed content in "
-					    "the signature\n"
+		  "    --content-attached    Content the signed content in "
+					    "the signature (.p7a)\n"
 		  "    --output <sig_file>   Write the signature to <sig_file> "
 					    "(DER-encoded PKCS#7 signature)\n"
-		  "                          Default <signed_file>.p7a\n",
+		  "                          Default <signed_file>.p7b\n",
 		  prog);
 }
 
@@ -113,7 +113,7 @@ parse_options(int argc, char *argv[])
 		{ "digest-alg", required_argument, NULL, 'D' },
 		{ "cipher-alg", required_argument, NULL, 'S' },
 		{ "detached-signature", no_argument, NULL, 'd' },
-		{ "attached-content", no_argument, NULL, 'a' },
+		{ "content-attached", no_argument, NULL, 'a' },
 		{ "output", required_argument, NULL, 'o' },
 		{ NULL },	/* NULL terminated */
 	};

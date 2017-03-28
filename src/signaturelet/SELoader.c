@@ -169,10 +169,11 @@ SELoader_sign(libsign_signaturelet_t *siglet, uint8_t *data,
 				goto err;
 
 			unsigned int digest_size;
+
 			libsign_digest_size(siglet->digest_alg, &digest_size);
 
-			libsign_utils_hex_dump("Signed content", digest,
-					       digest_size);
+			libsign_utils_hex_dump("Hash of signed content",
+					       digest, digest_size);
 
 			sig_content = digest;
 			sig_content_size = digest_size;
@@ -230,7 +231,9 @@ SELoader_sign(libsign_signaturelet_t *siglet, uint8_t *data,
 
 	info("SELoader PKCS#7 %s signature (signed content %d-byte) "
 	     "generated\n", flags & SIGNLET_FLAGS_DETACHED_SIGNATURE ?
-			    "detached" : "attached", sig_content_size);
+			    "detached" :
+			    flags & SIGNLET_FLAGS_CONTENT_ATTACHED ?
+			    "content-attached" : "attached", sig_content_size);
 
 	return EXIT_SUCCESS;
 err:
