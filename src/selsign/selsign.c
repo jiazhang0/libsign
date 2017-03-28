@@ -95,8 +95,8 @@ static char *opt_digest_alg = "sha256";
 static char *opt_cipher_alg = "rsa";
 static char *opt_output;
 static char *opt_signed_file;
-static bool opt_detached_signature = 0;
-static bool opt_attached_content = 0;
+static bool opt_detached_signature = false;
+static bool opt_attached_content = false;
 
 static int
 parse_options(int argc, char *argv[])
@@ -154,10 +154,10 @@ parse_options(int argc, char *argv[])
 			opt_cipher_alg = optarg;
 			break;
 		case 'd':
-			opt_detached_signature = 1;
+			opt_detached_signature = true;
 			break;
 		case 'a':
-			opt_attached_content = 1;
+			opt_attached_content = true;
 			break;
 		case 'o':
 			opt_output = optarg;
@@ -195,7 +195,7 @@ parse_options(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (opt_detached_signature) {
+	if (opt_detached_signature == true) {
 		err("The detached signature is still not "
 		    "supported\n");
 		return EXIT_FAILURE;
@@ -227,7 +227,7 @@ main(int argc, char **argv)
 	unsigned long flags = 0;
 
 	if (!opt_detached_signature) {
-		if (opt_attached_content)
+		if (opt_attached_content == true)
 			flags |= SIGNLET_FLAGS_CONTENT_ATTACHED;
 	} else
 		flags |= SIGNLET_FLAGS_DETACHED_SIGNATURE;

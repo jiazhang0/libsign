@@ -33,6 +33,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -75,8 +76,6 @@
 			exit(EXIT_FAILURE);	\
 		}	\
 	} while (0)
-
-typedef unsigned int		bool;
 
 #define gettid()		syscall(__NR_gettid)
 
