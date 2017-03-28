@@ -4,6 +4,7 @@ src/selsign/selsign
 *.so
 *.a
 *.siglet
+*.p7b
 *.p7a
 *.p7s
 *.patch
