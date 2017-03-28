@@ -241,12 +241,17 @@ err:
 	return EXIT_FAILURE;
 }
 
-static const signaturelet_suffix_pattern_t SELoader_suffix_pattern = {
-	SIGNLET_FLAGS_DETACHED_SIGNATURE, "+.p7s", "+.p7a",
+static const signaturelet_suffix_pattern_t SELoader_p7a_pattern = {
+	SIGNLET_FLAGS_CONTENT_ATTACHED, "+.p7a", NULL
+};
+
+static const signaturelet_suffix_pattern_t SELoader_p7s_pattern = {
+	SIGNLET_FLAGS_DETACHED_SIGNATURE, "+.p7s", "+.p7b",
 };
 
 static const signaturelet_suffix_pattern_t *suffix_patterns[] = {
-	&SELoader_suffix_pattern,
+	&SELoader_p7a_pattern,
+	&SELoader_p7s_pattern,
 	NULL
 };
 

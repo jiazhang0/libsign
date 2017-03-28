@@ -96,7 +96,7 @@ static char *opt_cipher_alg = "rsa";
 static char *opt_output;
 static char *opt_signed_file;
 static bool opt_detached_signature = 0;
-static bool opt_attached_content = 1;
+static bool opt_attached_content = 0;
 
 static int
 parse_options(int argc, char *argv[])

@@ -110,9 +110,11 @@ signaturelet_suffix_pattern(const char *id, unsigned long flags,
 	pattern = siglet->sig->suffix_pattern;
 	do {
 		if ((*pattern)->flag & flags) {
-			*suffix_pattern = (*pattern)->suffix_if_flag_set;
-			return EXIT_SUCCESS;
-		} else {
+			if ((*pattern)->suffix_if_flag_set) {
+				*suffix_pattern = (*pattern)->suffix_if_flag_set;
+				return EXIT_SUCCESS;
+			}
+		} else if ((*pattern)->suffix_if_flag_unset) {
 			*suffix_pattern = (*pattern)->suffix_if_flag_unset;
 			return EXIT_SUCCESS;
 		}
@@ -149,32 +151,26 @@ sanity_check_suffix_pattern(const signaturelet_suffix_pattern_t **pattern)
 		int rc;
 
 		if (!(*pattern)->flag) {
-			if (!(*pattern)->suffix_if_flag_unset) {
-				err("The suffix pattern for unset case must "
-				    "be specified if flag is unset\n");
-				return EXIT_FAILURE;
-			}
+			err("A suffix pattern must be specified with "
+			    "a non-empty flag\n");
+			return EXIT_FAILURE;
+		}
 
-			rc = check_suffix((*pattern)->suffix_if_flag_unset);
-			if (rc)
-				return EXIT_FAILURE;
-		} else {
-			if (!(*pattern)->suffix_if_flag_set) {
-				err("The suffix pattern for set case must "
-				    "be specified if flag is set\n");
-				return EXIT_FAILURE;
-			}
-			
+		if (!(*pattern)->suffix_if_flag_unset &&
+		    !(*pattern)->suffix_if_flag_set) {
+			err("A suffix string must be specified in either set "
+			    "case or unset case\n");
+			return EXIT_FAILURE;
+		}
+
+
+		if ((*pattern)->suffix_if_flag_set) {
 			rc = check_suffix((*pattern)->suffix_if_flag_set);
 			if (rc)
 				return EXIT_FAILURE;
-			
-			if (!(*pattern)->suffix_if_flag_unset) {
-				err("The suffix pattern for unset case must "
-				    "be specified if flag is set\n");
-				return EXIT_FAILURE;
-			}
-			
+		}
+
+		if ((*pattern)->suffix_if_flag_unset) {
 			rc = check_suffix((*pattern)->suffix_if_flag_unset);
 			if (rc)
 				return EXIT_FAILURE;
