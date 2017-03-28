@@ -195,6 +195,13 @@ parse_options(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	if (opt_detached_signature == true &&
+	    opt_attached_content == true) {
+		err("Invalid signature format specified\n");
+		show_usage(argv[0]);
+		return EXIT_FAILURE;
+	}
+
 	if (opt_detached_signature == true) {
 		err("The detached signature is still not "
 		    "supported\n");
