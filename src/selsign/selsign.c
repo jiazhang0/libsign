@@ -46,7 +46,7 @@ show_banner(void)
 {
 	info_cont("\nSELoader signing tool\n");
 	info_cont("Copyright (c) 2017, Lans Zhang "
-		  "<jia.zhang@windriver.com>");
+		  "<jia.zhang@windriver.com>\n");
 	info_cont("Version: %s+git%s\n", LIBSIGN_VERSION, libsign_git_commit);
 	info_cont("Build Machine: %s\n", libsign_build_machine);
 	info_cont("Build Time: " __DATE__ " " __TIME__ "\n\n");
