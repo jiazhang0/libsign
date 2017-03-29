@@ -27,8 +27,10 @@ install: all
 	$(INSTALL) -d -m 755 $(DESTDIR)$(libdir)
 	$(INSTALL) -m 755 $(LIB_NAME).a $(DESTDIR)$(libdir)
 	$(INSTALL) -m 755 $(LIB_NAME).so $(DESTDIR)$(libdir)/$(LIB_NAME).so.$(LIBSIGN_VERSION)
-	$(foreach x, $(LIB_NAME).so, ln -sfn $(x).$(LIBSIGN_VERSION) $(DESTDIR)$(libdir)/$(patsubst %,%.$(LIBSIGN_MAJOR_VERSION).$(LIBSIGN_MINOR_VERSION),$(x)); \
-		ln -sfn $(x).$(LIBSIGN_MAJOR_VERSION).$(LIBSIGN_MINOR_VERSION) $(DESTDIR)$(libdir)/$(patsubst %,%.$(LIBSIGN_MAJOR_VERSION),$(x));)
+	$(foreach x, $(LIB_NAME).so, \
+	    ln -sfn $(x).$(LIBSIGN_VERSION) $(DESTDIR)$(libdir)/$(patsubst %,%.$(LIBSIGN_MAJOR_VERSION).$(LIBSIGN_MINOR_VERSION),$(x)); \
+	    ln -sfn $(x).$(LIBSIGN_MAJOR_VERSION).$(LIBSIGN_MINOR_VERSION) $(DESTDIR)$(libdir)/$(patsubst %,%.$(LIBSIGN_MAJOR_VERSION),$(x)); \
+	    ln -sfn $(x).$(LIBSIGN_MAJOR_VERSION) $(DESTDIR)$(libdir)/$(patsubst %,%,$(x));)
 
 $(LIB_NAME).so: $(OBJS_$(LIB_NAME))
 	$(CC) $^ -o $@ $(CFLAGS) -shared -Wl,-soname,$(patsubst %.$(LIBSIGN_VERSION),%,$@)
