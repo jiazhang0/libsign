@@ -8,13 +8,17 @@ echo "LIBSIGN_ROOT=$LIBSIGN_ROOT"
 
 cmd="LD_LIBRARY_PATH=$LIBSIGN_ROOT/src/lib $LIBSIGN_ROOT/src/selsign/selsign"
 cmd_opts=""
-out=".p7a"
+out=".p7b"
 
 while [ $# -gt 0 ]; do
     case "$1" in
-    --detached)
+    -d|--detached)
         cmd_opts=$cmd_opts" -d"
         out=".p7s"
+        ;;
+    -a|--content-attached)
+        cmd_opts=$cmd_opts" -a"
+        out=".p7a"
         ;;
     *)
         break
