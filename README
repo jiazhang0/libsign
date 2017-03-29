@@ -19,7 +19,7 @@ Here is the signing example:
 
 $ selsign <file>
 
-By default, the generated signature file is suffixed by ".p7a".
+By default, the generated signature file is suffixed by ".p7b".
 
 To dump the content of signature, run:
-$ openssl pkcs7 -in <file.p7a> -inform DER -print -text -noout
+$ openssl pkcs7 -in <file.p7b> -inform DER -print -text -noout
