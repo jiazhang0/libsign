@@ -1,8 +1,8 @@
+include $(TOPDIR)/version.mk
 include $(TOPDIR)/env.mk
 include $(TOPDIR)/rules.mk
 
-CFLAGS += -DSELSIGN_VERSION=\"0.1.0\" \
-	  -DSELSIGN_KEY=\"$(TOPDIR)/key/efi_sb_keys/DB.key\" \
+CFLAGS += -DSELSIGN_KEY=\"$(TOPDIR)/key/efi_sb_keys/DB.key\" \
 	  -DSELSIGN_CERT=\"$(TOPDIR)/key/efi_sb_keys/DB.pem\" \
 	  -DSELSIGN_CA_CERT=\"$(TOPDIR)/key/efi_sb_keys/KEK.pem\" \
 

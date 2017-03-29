@@ -1,3 +1,4 @@
+include $(TOPDIR)/version.mk
 include $(TOPDIR)/env.mk
 include $(TOPDIR)/rules.mk
 

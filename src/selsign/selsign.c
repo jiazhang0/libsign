@@ -84,7 +84,7 @@ show_usage(const char *prog)
 static void
 show_version(void)
 {
-	info_cont("%s\n", SELSIGN_VERSION);
+	info_cont("%s\n", LIBSIGN_VERSION);
 }
 
 static int opt_quite;
