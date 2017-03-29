@@ -1,3 +1,9 @@
+Version 0.3.0
+=============
+Released: 2017-03-29
+
+- Fully support the SELoader signature formats (.p7a/.p7b/.p7s).
+
 Version 0.2.0
 =============
 Released: 2017-03-14
