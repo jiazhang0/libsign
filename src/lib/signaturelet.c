@@ -85,8 +85,27 @@ signaturelet_load(const char *id)
 	dbg("On-demond loading signaturelet %s ...\n", id);
 
 	void *handle = dlopen(path, RTLD_LAZY);
-	if (!handle)
-		return EXIT_FAILURE;
+	if (!handle) {
+		char *libdir;
+
+		libdir = getenv("LD_LIBRARY_PATH");
+		if (!libdir) {
+			err("Define $LD_LIBRARY_PATH/signaturelet to locate "
+			    "siglet\n");
+			return EXIT_FAILURE;
+		}
+
+		path_len = snprintf(path, sizeof(path) - 1, "%s/signaturelet"
+				    "/%s.siglet", libdir, id);
+		path[path_len] = 0;
+
+		dbg("Attempting to load signaturelet %s.siglet at %s ...\n",
+		    id, path);
+
+		handle = dlopen(path, RTLD_LAZY);
+		if (!handle)
+			return EXIT_FAILURE;
+	}
 
 	add_siglet_handle(handle);
 
