@@ -9,6 +9,7 @@ echo "LIBSIGN_ROOT=$LIBSIGN_ROOT"
 cmd="LD_LIBRARY_PATH=$LIBSIGN_ROOT/src/lib $LIBSIGN_ROOT/src/selsign/selsign"
 cmd_opts=""
 out=".p7b"
+verbose=0
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -19,6 +20,9 @@ while [ $# -gt 0 ]; do
     -a|--content-attached)
         cmd_opts=$cmd_opts" -a"
         out=".p7a"
+        ;;
+    -v|--verbose)
+        verbose=1
         ;;
     *)
         break
@@ -34,7 +38,5 @@ done
 
 eval "$cmd $cmd_opts $1"
 
-out="$1"$out
-
-[ $? -eq 0 -a -s "$out" ] &&
-    openssl pkcs7 -in "$out" -inform DER -print -text -noout
+[ $? -eq 0 -a -s "$1$out" -a $verbose -eq 1 ] &&
+    openssl pkcs7 -in "$1$out" -inform DER -print -text -noout
