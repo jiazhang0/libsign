@@ -48,3 +48,5 @@ eval "$cmd $cmd_opts $1"
 
 [ $? -eq 0 -a -s "$1$out" -a $verbose -eq 1 ] &&
     openssl pkcs7 -in "$1$out" -inform DER -print -text -noout
+
+exit 0
