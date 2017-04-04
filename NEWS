@@ -1,3 +1,10 @@
+Version 0.3.1
+=============
+Released: 2017-04-04
+
+- Add more options to scripts/selsign.
+- Support to use LD_LIBRARY_PATH to locate signaturelet.
+
 Version 0.3.0
 =============
 Released: 2017-03-29
