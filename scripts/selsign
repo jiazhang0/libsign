@@ -21,6 +21,14 @@ while [ $# -gt 0 ]; do
         cmd_opts=$cmd_opts" -a"
         out=".p7a"
         ;;
+    -k|--key)
+        cmd_opts=$cmd_opts" -k $2"
+        shift
+        ;;
+    -c|--cert)
+        cmd_opts=$cmd_opts" -c $2"
+        shift
+        ;;
     -v|--verbose)
         verbose=1
         ;;
