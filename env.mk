@@ -22,6 +22,7 @@ LDFLAGS := --warn-common --no-undefined --fatal-warnings \
 	   $(patsubst $(join -Wl,,)%,%,$(EXTRA_LDFLAGS))
 CFLAGS := -std=gnu11 -O2 -DLIBSIGN_VERSION=\"$(LIBSIGN_VERSION)\" \
 	  -Wall -Wsign-compare -Werror \
+	  $(addprefix $(join -L,),$(libdir)) \
 	  -lcrypto $(addprefix -I, $(TOPDIR)/src/include) \
 	  $(EXTRA_CFLAGS) $(addprefix $(join -Wl,,),$(LDFLAGS))
 
