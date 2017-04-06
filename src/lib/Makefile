@@ -16,7 +16,7 @@ OBJS_$(LIB_NAME) = \
 	x509.o \
 	key.o
 
-CFLAGS += -fpic -ldl -DSIGNATURELET_DIR=\"$(TOPDIR)/src/signaturelet\"
+CFLAGS += -fpic -ldl -DSIGNATURELET_DIR=\"$(SIGNATURELET_DIR)\"
 
 all: $(LIB_TARGETS) Makefile
 

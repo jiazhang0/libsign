@@ -12,6 +12,8 @@ EXTRA_LDFLAGS ?=
 
 DEBUG_BUILD ?=
 DESTDIR ?=
+SIGNATURELET_DIR ?= $(TOPDIR)/src/signaturelet
+
 prefix ?= /usr
 libdir ?= $(prefix)/lib
 bindir ?= $(prefix)/bin
