@@ -19,5 +19,5 @@ clean:
 	@$(RM) $(OBJS_SELoader) $(SIGNATURELET_NAMES)
 
 install: all
-	$(INSTALL) -d -m 755 $(DESTDIR)$(libdir)/signaturelet
-	$(INSTALL) -m 644 SELoader.siglet $(DESTDIR)$(libdir)/signaturelet
+	$(INSTALL) -d -m 0755 $(DESTDIR)$(libdir)/signaturelet
+	$(INSTALL) -m 0755 SELoader.siglet $(DESTDIR)$(libdir)/signaturelet
