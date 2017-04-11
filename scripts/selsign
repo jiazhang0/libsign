@@ -6,7 +6,7 @@ LIBSIGN_ROOT="`cd "$D"/.. && pwd`"
 
 echo "LIBSIGN_ROOT=$LIBSIGN_ROOT"
 
-cmd="LD_LIBRARY_PATH=$LIBSIGN_ROOT/src/lib $LIBSIGN_ROOT/src/selsign/selsign"
+cmd="LD_LIBRARY_PATH=$LIBSIGN_ROOT/src/lib:$LIBSIGN_ROOT/src $LIBSIGN_ROOT/src/selsign/selsign"
 cmd_opts=""
 out=".p7b"
 verbose=0
