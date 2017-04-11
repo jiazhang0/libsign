@@ -95,15 +95,31 @@ signaturelet_load(const char *id)
 			return EXIT_FAILURE;
 		}
 
-		path_len = snprintf(path, sizeof(path) - 1, "%s/signaturelet"
-				    "/%s.siglet", libdir, id);
-		path[path_len] = 0;
+		char *search = strdup(libdir);
+		if (!search)
+			return EXIT_FAILURE;
 
-		dbg("Attempting to load signaturelet %s.siglet at %s ...\n",
-		    id, path);
+		char *p = search;
 
-		handle = dlopen(path, RTLD_LAZY);
-		if (!handle)
+		while ((libdir = strtok(p, ":"))) {
+			path_len = snprintf(path, sizeof(path) - 1,
+					    "%s/signaturelet"
+					    "/%s.siglet", libdir, id);
+			path[path_len] = 0;
+
+			dbg("Attempting to load signaturelet %s.siglet at "
+			    "%s ...\n", id, path);
+
+			handle = dlopen(path, RTLD_LAZY);
+			if (handle)
+				break;
+
+			p = NULL;
+		}
+
+		free(search);
+
+		if (!libdir)
 			return EXIT_FAILURE;
 	}
 
