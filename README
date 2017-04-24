@@ -21,5 +21,15 @@ $ selsign <file>
 
 By default, the generated signature file is suffixed by ".p7b".
 
+How to verify the signature
+---------------------------
+
+Currently there is no easier way to recognize whether an signed file succeeds
+the signature check or not.
+
 To dump the content of signature, run:
-$ openssl pkcs7 -in <file.p7b> -inform DER -print -text -noout
+$ openssl pkcs7 -in <file.p7b> -inform DER -print -text -noout | less
+
+Find out the section "d.data", which is the SELoader signature. The last
+20-byte is the SHA-256 digest value. Run sha256sum <file> and compare the
+result with the SHA-256 digest value to know the consistency between them.
