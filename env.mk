@@ -17,7 +17,6 @@ SIGNATURELET_DIR ?= $(TOPDIR)/src/signaturelet
 prefix ?= /usr
 libdir ?= $(prefix)/lib
 bindir ?= $(prefix)/bin
-sbindir ?= $(prefix)/sbin
 includedir ?= $(prefix)/include
 
 LDFLAGS := --warn-common --no-undefined --fatal-warnings \
