@@ -47,6 +47,7 @@
 #include <ctype.h>
 #include <getopt.h>
 #include <dlfcn.h>
+#include <limits.h>
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>
