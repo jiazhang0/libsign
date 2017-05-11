@@ -11,13 +11,18 @@ EXTRA_CFLAGS ?=
 EXTRA_LDFLAGS ?=
 
 DEBUG_BUILD ?=
-DESTDIR ?=
 SIGNATURELET_DIR ?= $(TOPDIR)/src/signaturelet
 
+# For the build
 prefix ?= /usr
 libdir ?= $(prefix)/lib
 bindir ?= $(prefix)/bin
 includedir ?= $(prefix)/include
+
+# For the installation
+DESTDIR ?=
+BINDIR ?= $(bindir)
+LIBDIR ?= $(libdir)
 
 LDFLAGS := --warn-common --no-undefined --fatal-warnings \
 	   $(patsubst $(join -Wl,,)%,%,$(EXTRA_LDFLAGS))
