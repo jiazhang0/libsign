@@ -21,4 +21,4 @@ clean:
 
 install: all
 	$(INSTALL) -d -m 755 $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 700 $(BIN_NAME) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 755 $(BIN_NAME) $(DESTDIR)$(BINDIR)
