@@ -24,13 +24,13 @@ DESTDIR ?=
 BINDIR ?= $(bindir)
 LIBDIR ?= $(libdir)
 
-LDFLAGS := --warn-common --no-undefined --fatal-warnings \
-	   $(patsubst $(join -Wl,,)%,%,$(EXTRA_LDFLAGS))
+LDFLAGS := -Wl,--warn-common -Wl,--no-undefined -Wl,--fatal-warnings \
+	   $(EXTRA_LDFLAGS)
 CFLAGS := -std=gnu11 -O2 -DLIBSIGN_VERSION=\"$(LIBSIGN_VERSION)\" \
 	  -Wall -Wsign-compare -Werror \
 	  $(addprefix $(join -L,),$(libdir)) \
 	  -lcrypto $(addprefix -I, $(TOPDIR)/src/include) \
-	  $(EXTRA_CFLAGS) $(addprefix $(join -Wl,,),$(LDFLAGS))
+	  $(EXTRA_CFLAGS) $(LDFLAGS)
 
 ifneq ($(DEBUG_BUILD),)
 	CFLAGS += -ggdb -DDEBUG_BUILD
