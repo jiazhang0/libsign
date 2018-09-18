@@ -13,7 +13,7 @@ all: $(SIGNATURELET_NAMES) Makefile
 
 #.siglet: %.o
 SELoader.siglet: $(OBJS_SELoader) $(TOPDIR)/src/lib/libsign.so
-	$(CC) $^ -o $@ $(CFLAGS) -shared -Wl,-soname,$@
+	$(CCLD) $^ -o $@ $(CFLAGS) -shared -Wl,-soname,$@
 
 clean:
 	@$(RM) $(OBJS_SELoader) $(SIGNATURELET_NAMES)
