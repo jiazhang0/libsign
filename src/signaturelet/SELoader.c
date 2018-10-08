@@ -63,7 +63,7 @@ construct_sel_signature(uint8_t *sig_content, unsigned sig_content_size,
 
 	SEL_SIGNATURE_HEADER header;
 
-	strncpy((char *)&header.Magic, SelSigantureMagic,
+	memcpy((char *)&header.Magic, SelSigantureMagic,
 		sizeof(header.Magic));
 	header.Revision = SelSignatureRevision;
 	header.HeaderSize = sizeof(header);
